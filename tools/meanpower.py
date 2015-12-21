@@ -118,7 +118,7 @@ def main():
         
         
         # compute the average
-        avg = (data, sum_only=['modes'], weights='modes')
+        avg = average(data, sum_only=['modes'], weights='modes')
         io.write_plaintext(avg, output_file)
     
 if __name__ == '__main__':
