@@ -113,9 +113,9 @@ def main():
                 raise RuntimeError("error reading `%s` as plain text file: %s" %(f, str(e)))
             
             if args.mode == '2d':
-                d = dataSet.Power2dDataSet.from_nbkit(d, m, sum_only=['modes'], force_index_match=True)
+                d = dataset.Power2dDataSet.from_nbkit(d, m, sum_only=['modes'], force_index_match=True)
             else:
-                d = dataSet.Power1dDataSet.from_nbkit(d, m, sum_only=['modes'], force_index_match=True)
+                d = dataset.Power1dDataSet.from_nbkit(d, m, sum_only=['modes'], force_index_match=True)
             data.append(d)
         
         
