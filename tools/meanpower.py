@@ -114,6 +114,8 @@ def main():
             
             if args.mode == '2d':
                 d = dataSet.Power2dDataSet.from_nbkit(d, m, sum_only=['modes'], force_index_match=True)
+            else:
+                d = dataSet.Power1dDataSet.from_nbkit(d, m, sum_only=['modes'], force_index_match=True)
             data.append(d)
         
         
