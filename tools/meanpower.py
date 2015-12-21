@@ -9,9 +9,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 import argparse as ap
 from glob import glob
-from nbodykit import files, pkmuresult
-from nbodykit.extensionpoints import MeasurementStorage
+from nbodykit import files, dataset
 import numpy
+from lsskit.specksis import io
 
 desc = "designed to read in a set of 1D or 2D power plain text " + \
        "files and output the mean power to a plain text file"
@@ -29,6 +29,46 @@ h = 'loop over these arguments, doing a string replace on the ' + \
 parser.add_argument('--batch', nargs='+', type=str, help=h)
 
 args = parser.parse_args()
+
+
+def average(datasets, weights=None, sum_only=[]):
+
+    # check columns for all objects
+    columns = [d.variables for d in datasets]
+    if not all(sorted(cols) == sorted(columns[0]) for cols in columns):
+        raise ValueError("cannot average DataSet with different column names")
+        
+    # compute the weights
+    if weights is None:
+        weights = numpy.ones((len(datasets),) + datasets[0].shape)
+    else:
+        if isinstance(weights, basestring):
+            if weights not in columns[0]:
+                raise ValueError("Cannot weight by `%s`; no such column" %weights)
+            weights = numpy.array([d[weights] for d in datasets])
+    
+    # return a copy
+    toret = datasets[0].copy()
+    
+    # take the mean or the sum   
+    for name in columns[0]:
+        col_data = numpy.array([d[name] for d in datasets])
+        if name not in sum_only:
+            with numpy.errstate(invalid='ignore'):
+                toret[name] = (col_data*weights).sum(axis=0) / weights.sum(axis=0)
+        else:
+            toret[name] = numpy.sum(col_data, axis=0)
+        
+    # handle the metadata
+    for key in datasets[0].attrs:
+        try:
+            toret.attrs[key] = numpy.mean([d.attrs[key] for d in datasets])
+        except:
+            pass
+    
+    
+    return toret
+        
 
 def main():
 
@@ -64,8 +104,8 @@ def main():
         print "averaging %d files..." %len(results)
     
         # loop over each file
-        data, meta = [], []
-        reader = files.ReadPower2DPlainText if args.mode == '2d' else files.ReadPower1DPlainText
+        data = []
+        reader = files.Read2DPlainText if args.mode == '2d' else files.Read1DPlainText
         for f in results:
             try:
                 d, m = reader(f)
@@ -73,51 +113,13 @@ def main():
                 raise RuntimeError("error reading `%s` as plain text file: %s" %(f, str(e)))
             
             if args.mode == '2d':
-                d = pkmuresult.PkmuResult.from_dict(d, **m)
+                d = dataSet.Power2dDataSet.from_nbkit(d, m, sum_only=['modes'], force_index_match=True)
             data.append(d)
-            meta.append(m)
         
-        # average and output
-        if args.mode == '2d':
-            avg = pkmuresult.PkmuResult.from_list(data, sum_only=['modes'], weights='modes')
-            output = MeasurementStorage.new('2d', output_file)
-    
-            data = {k:avg[k].data for k in avg.columns}
-            data['edges'] = [avg.kedges, avg.muedges]
-            meta = {k:getattr(avg,k) for k in avg._metadata}
-            
-            print "saving %s..." %output_file
-            output.write(data, **meta)
-        else:    
-            # this assumes modes is the last column    
-            avg = []
-            ncols = data[0].shape[-1]
-            cols = meta[0].pop('cols', None)
-            edges = meta[0].pop('edges', None)
-            for i in range(ncols):
-            
-                if i == ncols-1:
-                    avg.append(numpy.sum([d[:,i] for d in data], axis=0))
-                else:
-                    # mask any element that is NaN for all spectra we are avging
-                    mask = numpy.ones(data[0].shape[0], dtype=bool)
-                    for d in data:
-                        mask &= numpy.isnan(d[:,i])
-                
-                    colavg = numpy.empty(mask.shape)
-                    weights = [d[:,-1][~mask] for d in data] # weight by modes
-                    colavg[~mask] = numpy.average([d[:,i][~mask] for d in data], axis=0, weights=weights)
-                    colavg[mask] = numpy.nan
-                    avg.append(colavg)
-
-            # get the average meta data
-            new_meta = {}
-            for k in meta[0]:
-                new_meta[k] = numpy.mean([m[k] for m in meta], axis=0)
-                
-            print "saving %s..." %output_file
-            output = MeasurementStorage.new('1d', output_file) 
-            output.write(edges, cols, avg, **new_meta)
+        
+        # compute the average
+        avg = (data, sum_only=['modes'], weights='modes')
+        io.write_plaintext(avg, output_file)
     
 if __name__ == '__main__':
     main()
