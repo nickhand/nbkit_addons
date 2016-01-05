@@ -65,7 +65,7 @@ def parse_args(desc, dims, coords):
     h = 'the name of the file specifying the main power.py parameters'
     parser.add_argument('-p', '--config', required=True, type=param_file, help=h)
     h = 'the name of the file specifying the selection parameters'
-    parser.add_argument('-s', '--select', required=True, type=extra_iter_values, help=h)
+    parser.add_argument('-s', '--select', default={}, type=extra_iter_values, help=h)
     h = 'the job submission mode'
     parser.add_argument('--mode', choices=['pbs', 'slurm'], default='pbs', help=h)
     
