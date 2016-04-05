@@ -71,19 +71,11 @@ def main(ns):
     # initialize the worker pool
     kws = {'comm':comm, 'use_all_cpus':ns.use_all_cpus, 'debug':ns.debug}
     pool = MPIPool(bianchi, ns.N, **kws)
-    
-    # wait
-    if not pool.is_master():
-        pool.wait()
-        sys.exit(0)
        
     # do the work
     results = pool.compute(boxes)
     
-    # close the pool
-    pool.close()
-    
-   
+
 if __name__ == '__main__' :
     
     # parse
