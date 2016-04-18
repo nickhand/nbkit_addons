@@ -28,7 +28,7 @@ class BianchiWrapper(object):
             self.config = ff.read()
             
             raw_config = yaml.load(self.config)
-            self.data_params = raw_config['input']['data']
+            self.data_params = raw_config['data']
             self.output = raw_config['output']
             
         self.algorithm = None
@@ -46,6 +46,7 @@ class BianchiWrapper(object):
             
             # initialize the algorithm
             self.algorithm = algorithms.BianchiFFTPower(**vars(params))
+            self.algorithm.keep_cache = True # keep the cache
             
         else:
             
@@ -53,7 +54,7 @@ class BianchiWrapper(object):
             kws = self.data_params.copy()
             kws['path'] = kws['path'].format(box=box)
             data = DataSource.from_config(kws)
-            self.algorithm.input.update_data(data)
+            self.algorithm.catalog.data = data
             
         result = self.algorithm.run()    
         output = self.output.format(box=box)
