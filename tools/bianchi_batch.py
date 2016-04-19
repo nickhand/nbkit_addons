@@ -8,7 +8,7 @@ import yaml
 from mpi4py import MPI
 
 from nbodykit.extensionpoints import algorithms, Algorithm, DataSource
-from nbodykit.utils.parallel import MPIPool
+from nbodykit.utils.taskmanager import TaskManager
 
 # setup the logging
 comm = MPI.COMM_WORLD
@@ -71,10 +71,10 @@ def main(ns):
     
     # initialize the worker pool
     kws = {'comm':comm, 'use_all_cpus':ns.use_all_cpus, 'debug':ns.debug}
-    pool = MPIPool(bianchi, ns.N, **kws)
+    manager = TaskManager(bianchi, ns.N, **kws)
        
     # do the work
-    results = pool.compute(boxes)
+    results = manager.compute(boxes)
     
 
 if __name__ == '__main__' :
