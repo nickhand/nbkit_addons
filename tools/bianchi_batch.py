@@ -51,8 +51,8 @@ class BianchiWrapper(object):
         else:
             
             # create a new ``data`` DataSource and set it
-            kws = self.data_params.copy()
-            kws['path'] = kws['path'].format(box=box)
+            config = self.config.format(box=box)
+            kws = yaml.load(config)['data']
             data = DataSource.from_config(kws)
             self.algorithm.catalog.data = data
             
