@@ -12,9 +12,9 @@ class MomentumMomentsAuto(Transfer):
         pass
 
     @classmethod
-    def register(kls):
-        h = kls.parser
-        h.add_argument("ell", type=int, help="the radial velocity moment")
+    def register(cls):
+        s = cls.schema
+        s.add_argument("ell", type=int, help="the radial velocity moment")
   
     def __call__(self, pm, complex):
         
@@ -31,10 +31,10 @@ class MomentumMomentsCross(Transfer):
         pass
 
     @classmethod
-    def register(kls):
-        h = kls.parser
-        h.add_argument("ell", type=int, help="the 1st radial velocity moment")
-        h.add_argument("ell_prime", type=int, help="the 2nd radial velocity moment")
+    def register(cls):
+        s = cls.schema
+        s.add_argument("ell", type=int, help="the 1st radial velocity moment")
+        s.add_argument("ell_prime", type=int, help="the 2nd radial velocity moment")
   
     def __call__(self, pm, complex):
         
