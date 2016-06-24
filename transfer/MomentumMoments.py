@@ -7,6 +7,9 @@ class MomentumMomentsAuto(Transfer):
     Transfer function for radial momentum moments
     """
     plugin_name = "MomentumMomentsAuto"
+    
+    def __init__(self, ell):
+        pass
 
     @classmethod
     def register(kls):
@@ -23,6 +26,9 @@ class MomentumMomentsCross(Transfer):
     Transfer function for radial momentum moments
     """
     plugin_name = "MomentumMomentsCross"
+    
+    def __init__(self, ell, ell_prime):
+        pass
 
     @classmethod
     def register(kls):
