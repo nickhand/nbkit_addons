@@ -1,6 +1,4 @@
 from nbodykit.extensionpoints import Transfer
-import numpy
-
 
 class MomentumMomentsAuto(Transfer):
     """
@@ -17,6 +15,7 @@ class MomentumMomentsAuto(Transfer):
         s.add_argument("ell", type=int, help="the radial velocity moment")
   
     def __call__(self, pm, complex):
+        import numpy
         
         kern = 1.0 / numpy.math.factorial(self.ell)    
         complex[:] *= kern
@@ -37,6 +36,7 @@ class MomentumMomentsCross(Transfer):
         s.add_argument("ell_prime", type=int, help="the 2nd radial velocity moment")
   
     def __call__(self, pm, complex):
+        import numpy
         
         norm = numpy.math.factorial(self.ell) * numpy.math.factorial(self.ell_prime)
         if self.ell == self.ell_prime:
